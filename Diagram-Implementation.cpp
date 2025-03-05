@@ -62,7 +62,9 @@ public:
 
     void displayOrder() {
         cout << "\nOrder ID: " << orderID << "\nTotal Amount: " << totalAmount << "\nStatus: " << orderStatus << endl;
+
         cout << "Product ID | Name | Price | Quantity" << endl;
+
         for (auto& item : cart) {
             cout << item.first << " | " << item.second.first->name << " | " << item.second.first->price << " | " << item.second.second << endl;
         }
@@ -84,55 +86,69 @@ int main() {
     ShoppingCart cart;
     vector<Order> orders;
 
-    while (true) {
+    int choice;
+    do {
         cout << "\n1. View Products\n2. View Shopping Cart\n3. View Orders\n4. Exit\nEnter choice: ";
-        int choice;
         cin >> choice;
 
-        if (choice == 1) {
-            cout << "\nAvailable Products:" << endl;
-            cout << "Product ID | Name | Price | Stock" << endl;
-            for (auto& product : products) {
-                product.displayProduct();
-            }
-            while (true) {
+        switch (choice) {
+            case 1: {
+                cout << "\nAvailable Products:" << endl;
+                cout << "Product ID | Name | Price | Stock" << endl;
+                for (auto& product : products) {
+                    product.displayProduct();
+                }
+
                 string prodID;
                 cout << "Enter Product ID to add (or 'exit' to return): ";
                 cin >> prodID;
-                if (prodID == "exit") break;
-                int qty;
-                cout << "Enter quantity: ";
-                cin >> qty;
-                auto it = find_if(products.begin(), products.end(), [&](Product& p) { return p.productID == prodID; });
-                if (it != products.end()) {
-                    cart.addProduct(&(*it), qty);
-                } else {
-                    cout << "Invalid Product ID." << endl;
+
+                while (prodID != "exit") {
+                    int qty;
+                    cout << "Enter quantity: ";
+                    cin >> qty;
+                    auto it = find_if(products.begin(), products.end(), [&](Product& p) { return p.productID == prodID; });
+                    if (it != products.end()) {
+                        cart.addProduct(&(*it), qty);
+                    } else {
+                        cout << "Invalid Product ID." << endl;
+                    }
+                    cout << "Enter Product ID to add (or 'exit' to return): ";
+                    cin >> prodID;
                 }
+                break;
             }
-        } else if (choice == 2) {
-            cart.displayCart();
-            cout << "Do you want to check out? (1 for Yes, 0 for No): ";
-            int checkout;
-            cin >> checkout;
-            if (checkout) {
-                double total = 0;
-                for (auto& item : cart.items) {
-                    total += item.second.first->price * item.second.second;
+            case 2: {
+                cart.displayCart();
+                cout << "Do you want to check out? (1 for Yes, 0 for No): ";
+                int checkout;
+                cin >> checkout;
+                if (checkout) {
+                    double total = 0;
+                    for (auto& item : cart.items) {
+                        total += item.second.first->price * item.second.second;
+                    }
+                    orders.emplace_back(&cart, total);
+                    cart.items.clear();
+                    cout << "You have successfully checked out!" << endl;
                 }
-                orders.emplace_back(&cart, total);
-                cart.items.clear();
-                cout << "You have successfully checked out!" << endl;
+                break;
             }
-        } else if (choice == 3) {
-            if (orders.empty()) cout << "No orders placed yet." << endl;
-            else for (auto& order : orders) order.displayOrder();
-        } else if (choice == 4) {
-            cout << "Exiting..." << endl;
-            break;
-        } else {
-            cout << "Invalid choice. Try again." << endl;
+            case 3: {
+                if (orders.empty()) cout << "No orders placed yet." << endl;
+                else for (auto& order : orders) order.displayOrder();
+                break;
+            }
+            case 4: {
+                cout << "Exiting..." << endl;
+                break;
+            }
+            default: {
+                cout << "Invalid choice. Try again." << endl;
+                break;
+            }
         }
-    }
+    } while (choice != 4);
+
     return 0;
 }
